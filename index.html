@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    <div id="bestscore">Meilleur score :</div>
+    <br>
+    <div id="timer">Timer :</div>
+    <div id="board"></div>
+
+    <script>
+        
+        let test = Number(window.prompt("Combien de boites voulez-vous?"));
+        let bestScore = 0;  // variable bestscore qu'on initialise à 0
+        let counter = 0;  // variable counter que j'initialise à 0
+
+        
+        
+        
+        // Mise à jour du timer, en reprenant l'élément "timer"
+        function updateTimer() {
+            document.getElementById('timer').innerText = counter;  // Affiche le compteur 
+            counter++;  // Rajoute +1 à chaque seconde écoulée
+            if (counter >= bestScore) {
+                bestScore = counter;  // Met à jour le meilleur score
+                document.getElementById('bestscore').innerText = "Meilleur score : " + bestScore;  // Affiche le meilleur score dans la div best score
+            }
+            
+        }
+        const interval = setInterval(updateTimer, 1000); //intevalle de 1000 ms
+
+        
+
+        
+       
+        
+
+        
+
+        // Fonction qui permet de mélanger les boîtes affichées aléatoirement
+        function shuffleChildren(parent){
+            let children = Array.from(parent.children);
+            let i = children.length, k, temp;
+            while (--i > 0){
+                k = Math.floor(Math.random() * (i + 1));
+                temp = children[k];
+                children[k] = children[i];
+                children[i] = temp;
+            }
+            children.forEach(child => parent.appendChild(child));
+        }
+
+        // Fonction qui renvoie un affichage
+        function showReaction(type, clickedBox){
+            clickedBox.classList.add(type);
+            if(type !== "success"){
+                setTimeout(function(){
+                    clickedBox.classList.remove(type);
+                }, 800);
+                clearInterval(interval)
+            }
+        }
+
+        // Récupération des données de la classe div
+        const box = document.createElement("div");
+
+        // Ajouter une box à la class box
+        box.classList.add("box");
+
+        const board = document.querySelector("#board");
+        let nb = 1;
+
+        // Boucle qui va cloner jusqu'à 'test' box, qu'on set up a 1 et qu'on incrémente jusqu'à ce que i = test
+        for(let i = 1; i <= test; i++){
+            let newbox = box.cloneNode();
+            newbox.innerText = i;
+            board.appendChild(newbox);
+
+            // Ajouter un écouteur sur le clic, qui va appliquer une fonction
+            newbox.addEventListener("click", function() {
+                if (i === nb){
+                    newbox.classList.add("box-valid");
+
+                    if(nb === board.children.length){
+                        board.querySelectorAll(".box").forEach(function(box) {
+                            showReaction("success", box);
+                        });
+                        clearInterval(interval); // Arrête l'intervalle 
+                    }
+                    nb++;
+                }
+                else if (i > nb){
+                    showReaction("error", newbox);
+                    nb = 1;
+                    board.querySelectorAll(".box-valid").forEach(function(validBox) {
+                        validBox.classList.remove("box-valid");
+                    });
+                }
+                else {
+                    showReaction("notice", newbox);
+                }
+
+                // Mélanger les boîtes à chaque clic
+                shuffleChildren(board);
+            });
+        }
+
+        // Fonction shuffleChildren de la classe board, qui va mélanger aléatoirement les boîtes
+        shuffleChildren(board);
+    </script>
+</body>
+</html>
